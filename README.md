@@ -32,24 +32,24 @@ Example server
 --------------
 * api.php
 
-	<?php
-	require_once('my.class.php');
-	require_once('jsonrpc2php.php');
-	$myClass = new myClass();
-	$jsonRpc = new jsonrpcphp();
-	$jsonRpc->registerClass($myClass);
-	$jsonRpc->handle() or die('no request');
-	?>
+		<?php
+		require_once('my.class.php');
+		require_once('jsonrpc2php.php');
+		$myClass = new myClass();
+		$jsonRpc = new jsonrpcphp();
+		$jsonRpc->registerClass($myClass);
+		$jsonRpc->handle() or die('no request');
+		?>
 
 * my.class.php
 
-	<?php
-	class myClass {
-		public function ping($msg) {
-			return "pong:" . $msg;
+		<?php
+		class myClass {
+			public function ping($msg) {
+				return "pong:" . $msg;
+			}
 		}
-	}
-	?>
+		?>
 
 Example javascipt client
 ------------------------
