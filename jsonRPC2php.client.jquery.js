@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  $.fn.jsonrpcphp(host){
  	that = this;
  	this.host = host;
+ 	this.currId = 0;
  	/**
  	 * Main rpc function, wrapper for $.ajax();
  	 *
@@ -49,7 +50,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 	 		request.params = params;
 	 	}
  		if (typeof(callback) != "undefined"){
- 			request.id = 447;
+ 			this.currId += 1;
+ 			request.id = this.currId;
  		}
  		$.ajax({
 		  url:host,
@@ -65,10 +67,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		  	console.log("success");
  			if (r.error != null){
  				alert(r.error.code + "::" + r.error.message + "::" + r.error.data.fullMessage);
- 				//console.log(r.error);
+ 				console.log(r.error);
  				return false;
  			} else if (typeof r.id != "undefined"){
- 				callback(r);
+ 				if (r.id == request.id){
+ 					callback(r);
+ 				} else {
+ 					alert("jsonrpc2Error::NO_ID_MATCH::Given Id and recieved Id does not match");
+ 					return false;
+ 				}
  			} else {
  				return true;
  			}
@@ -94,6 +101,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  	 *
  	 */
  		this.__rpc__('rpc.listMethods','',function(system){
+ 			//console.log(system);
  			$.each(system.result,function(ext,methods){
  				that[ext] = {};
  				for (method in methods){

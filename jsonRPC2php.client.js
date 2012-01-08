@@ -20,15 +20,16 @@ along with JSON-RPC2PHP; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-/*
- * jsonrpcphp client for javascript
- * for use with http://jsonrpcphp.org/
+/**
+ * jsonrpc2php client for javascript
+ * for use with http://github.com/subutux/json-rpc2php/
  * @author Stijn Van Campenhout <stijn.vancampenhout@gmail.com>
  * @version 1.0
  */
  function jsonrpcphp(host){
  	that = this;
  	this.host = host;
+ 	this.currId = 0;
  	/**
  	 * Main rpc function, wrapper for $.ajax();
  	 *
@@ -36,7 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  	 * @param string,array,object params
  	 * @param function callback
  	 */
- 	this._rpc_ = function(method,params,callback){
+ 	this.__rpc__ = function(method,params,callback){
  		request = {};
  		request.jsonrpc = "2.0";
  		request.method = method;
@@ -47,7 +48,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 	 		request.params = params;
 	 	}
  		if (typeof(callback) != "undefined"){
- 			request.id = 447;
+ 			this.currId += 1;
+ 			request.id = this.currId;
  		}
  		$.ajax({
 		  url:host,
@@ -66,7 +68,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  				console.log(r.error);
  				return false;
  			} else if (typeof r.id != "undefined"){
- 				callback(r);
+ 				if (r.id == request.id){
+ 					callback(r);
+ 				} else {
+ 					alert("jsonrpc2Error::NO_ID_MATCH::Given Id and recieved Id does not match");
+ 					return false;
+ 				}
  			} else {
  				return true;
  			}
@@ -82,7 +89,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  	 */
  	this.buildFunction = function(method) {
  		return function (params,callback){
- 			that._rpc_(method,params,callback);
+ 			that.__rpc__(method,params,callback);
  		}
  	}
  	
@@ -91,8 +98,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  	 * rpc.[extension].[method](params,callback);
  	 *
  	 */
- 		this._rpc_('rpc.listMethods','',function(system){
- 			console.log(system);
+ 		this.__rpc__('rpc.listMethods','',function(system){
+ 			//console.log(system);
  			$.each(system.result,function(ext,methods){
  				that[ext] = {};
  				for (method in methods){
@@ -102,5 +109,3 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  			});
  		});
 }
- 			
- 			
