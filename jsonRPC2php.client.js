@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * @author Stijn Van Campenhout <stijn.vancampenhout@gmail.com>
  * @version 1.0
  */
- function jsonrpcphp(host){
+ function jsonrpcphp(host,mainCallback){
  	that = this;
  	this.host = host;
  	this.currId = 0;
@@ -99,7 +99,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  	 *
  	 */
  		this.__rpc__('rpc.listMethods','',function(system){
- 			//console.log(system);
+ 			console.log(system);
  			$.each(system.result,function(ext,methods){
  				that[ext] = {};
  				for (method in methods){
@@ -107,5 +107,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  					that[ext][m] = that.buildFunction(ext + "." + m);
  				};
  			});
+ 			mainCallback();
  		});
 }

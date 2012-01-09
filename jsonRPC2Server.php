@@ -46,7 +46,7 @@ class jsonRPCServer {
 		'-32600' => 'The JSON sent is not a valid Request object.',
 		'-32601' => 'The method does not exist / is not available.',
 		'-32602' => 'Invalid method parameters.',
-		'-32603' => 'Internal Server error.s',
+		'-32603' => 'Internal Server error.',
 		'-32000' => 'The requested extension does not exist / is not available.'
 		);
 	
@@ -55,7 +55,7 @@ class jsonRPCServer {
 		'invalidRequest'	=> '-32600',
 		'methodNotFound'	=> '-32601',
 		'invalidParameters'	=> '-32602',
-		'internalError'		=> '-32602',
+		'internalError'		=> '-32603',
 		'extensionNotFound'	=> '-32000'
 		);
 	/**
@@ -80,7 +80,7 @@ class jsonRPCServer {
 	 		}
 	 		if (isset($this->request['params']['extension'])){
 	 			if (array_key_exists($this->request['params']['extension'],$this->classes)){
-	 				$this->ok($methods[$this->request['params']['extension']]);
+	 				$this->ok(array($this->request['params']['extension'] => $methods[$this->request['params']['extension']]));
 	 				$this->sendResponse();
 	 			} else {
 	 				$this->error($this->errorCodes['extensionNotFound'],"requested extension not found in extension list." );
@@ -150,13 +150,24 @@ class jsonRPCServer {
 					'data'	=> array(
 						'request' => (isset($this->request)) ? $this->request : NULL,
 						'extension' => (isset($this->extension)) ? $this->extension : NULL,
-						'fullMessage' => (isset($this->errorMessagesFull[$c])) ? $this->errorMessagesFull[$c] : $fmsg
+						'fullMessage' => ($fmsg) ? $fmsg : $this->errorMessagesFull[$c]
 						)
 					)
 				);
 		return true;
 	}
+	private function toUtf8(array $array) { 
+    $convertedArray = array(); 
+    foreach($array as $key => $value) { 
+      if(!mb_check_encoding($key, 'UTF-8')) $key = utf8_encode($key); 
+      if(is_array($value)) $value = $this->toUtf8($value); 
+
+      $convertedArray[$key] = $value; 
+    } 
+    return $convertedArray; 
+  } 
 	private function ok($result){
+					//print_r($result);
 					$this->response = array (
 						'jsonrpc'	=> '2.0',
 						'id' => $this->request['id'],
@@ -190,13 +201,13 @@ class jsonRPCServer {
 			$obj = $this->classes[$this->extension];
 		
 			if ($result = @call_user_func_array(array($obj,$this->request['method']),$this->request['params'])) {
-				$this->ok($result);
+				$this->ok((is_array($result)) ? $result : Array($result));
 			} else {
 				throw new Exception('Method function returned false.');
 			}
 		} catch (Exception $e) {
 				$c = ($e->getCode() != 0) ? $e->getCode : $this->errorCodes['internalError'];
-				$this->error($c,$e->getMessage);
+				$this->error($c,$e->getMessage());
 		}
 		$this->sendResponse();
 		return true;
