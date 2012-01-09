@@ -56,8 +56,9 @@ Example javascript client
 
 	<script type="javascript/text" src="jsonrpc2php.client.js"></script>
 	<script>
-	var rpc = new jsonrpcphp('api.php');
-	rpc.myClass.ping("hello world!",function(jsonRpcObj){
-		alert(jsonRpcObj.return);
+	var rpc = new jsonrpcphp('api.php',function(){
+		rpc.myClass.ping("hello world!",function(jsonRpcObj){
+			alert(jsonRpcObj.return);
+		});
 	});
 	</script>
