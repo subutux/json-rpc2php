@@ -1,5 +1,3 @@
-[donate_link]: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=J8RZGZC5WPZDU&lc=BE&item_name=Subutux&item_number=TRANSRSS&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted "donate"
-
 json-rpc2php
 ============
 json-rpc2php ?
@@ -11,7 +9,7 @@ contains a php json-rpc version 2.0 server and a javascript json-rpc version 2.0
 Open Source
 ------------
 
-json-rpc2php is open source under GPLv2 licence. Please consider a [donate][] so I can keep working on this.
+json-rpc2php is open source under GPLv2 licence. Please consider a [donate](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=J8RZGZC5WPZDU&lc=BE&item_name=Subutux&item_number=TRANSRSS&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted) so I can keep working on this.
 
 Features php server
 --------------------
