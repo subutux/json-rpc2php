@@ -1,3 +1,5 @@
+[donate_link]: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=J8RZGZC5WPZDU&lc=BE&item_name=Subutux&item_number=TRANSRSS&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
+
 json-rpc2php
 ============
 json-rpc2php ?
@@ -6,6 +8,10 @@ json-rpc2php ?
 json-rpc2php is a php and javascript library.
 contains a php json-rpc version 2.0 server and a javascript json-rpc version 2.0 client
 
+Open Source
+------------
+
+json-rpc2php is open source under GPLv2 licence. Please consider a [donation][donation_link] so I can keep working on this.
 
 Features php server
 --------------------
