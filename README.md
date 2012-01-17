@@ -30,8 +30,6 @@ Features javascript client library
 
 * uses the jQuery library
 
-* also available as jQuery library
-
 Example server
 --------------
 * api.php
