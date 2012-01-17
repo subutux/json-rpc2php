@@ -11,7 +11,7 @@ contains a php json-rpc version 2.0 server and a javascript json-rpc version 2.0
 Open Source
 ------------
 
-json-rpc2php is open source under GPLv2 licence. Please consider a [donation_link][] so I can keep working on this.
+json-rpc2php is open source under GPLv2 licence. Please consider a [donate][] so I can keep working on this.
 
 Features php server
 --------------------
