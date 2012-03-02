@@ -71,13 +71,13 @@ Example javascript client
 Example PHP client
 ------------------
 
- <?php
- require_once 'jsonRPC2Client.php';
- $myClass = new jsonRPCClient('http://server.hosting.api/api.php','myClass');
- print_r($myClass->ping('testing one 2 three.'));
- /* Outputs:
- 	Array (
- 		[0] => "pong:testing one 2 three"
- 	)
- */
- ?>
+	 <?php
+	 require_once 'jsonRPC2Client.php';
+	 $myClass = new jsonRPCClient('http://server.hosting.api/api.php','myClass');
+	 print_r($myClass->ping('testing one 2 three.'));
+	 /* Outputs:
+	 	Array (
+	 		[0] => "pong:testing one 2 three"
+	 	)
+	 */
+	 ?>
