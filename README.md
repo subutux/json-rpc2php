@@ -30,15 +30,19 @@ Features javascript client library
 
 * uses the jQuery library
 
+Features PHP Client *NEW*
+-------------------------
+* Simple usage: Directly call object function from client class
+
 Example server
 --------------
 * api.php
 
 		<?php
 		require_once('my.class.php');
-		require_once('jsonrpc2php.php');
+		require_once('jsonRPC2Server.php');
 		$myClass = new myClass();
-		$jsonRpc = new jsonrpcphp();
+		$jsonRpc = new jsonRPCServer();
 		$jsonRpc->registerClass($myClass);
 		$jsonRpc->handle() or die('no request');
 		?>
@@ -64,3 +68,16 @@ Example javascript client
 		});
 	});
 	</script>
+Example PHP client
+------------------
+
+ <?php
+ require_once 'jsonRPC2Client.php';
+ $myClass = new jsonRPCClient('http://server.hosting.api/api.php','myClass');
+ print_r($myClass->ping('testing one 2 three.'));
+ /* Outputs:
+ 	Array (
+ 		[0] => "pong:testing one 2 three"
+ 	)
+ */
+ ?>
