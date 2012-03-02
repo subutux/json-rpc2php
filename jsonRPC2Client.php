@@ -1,6 +1,6 @@
 <?
 /*
-					COPYRIGHT
+                    COPYRIGHT
 
 Copyright 2012 Stijn Van Campenhout <stijn.vancampenhout@gmail.com>
 
@@ -29,22 +29,22 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * @author stijn <stijn.vancampenhout@gmail.com>
  */
 class jsonRPCClient {
-	private $url;
-	private $id;
-	private $notification = false;
-	private $class;
+    private $url;
+    private $id;
+    private $notification = false;
+    private $class;
 
-	private function __construct($host,$class){
-		$this->url = $host;
-		$this->$class = $class;
-		$this->id = 1;
-	}
+    public function __construct($host,$class){
+        $this->url = $host;
+        $this->class = $class;
+        $this->id = 1;
+    }
 
-	private function setNotification($notify = false){
-		$this->notification = $notify;
-	}
-	private function __call($method,$params){
- 		// check
+    private function setNotification($notify = false){
+        $this->notification = $notify;
+    }
+    public function __call($method,$params){
+        // check
         if (!is_scalar($method)) {
             throw new Exception('Method name has no scalar value');
         }
@@ -64,14 +64,14 @@ class jsonRPCClient {
         }
         $request = array(
                 'jsonrpc' => '2.0',
-        		'method' => $class . '.' .$method,
-        		'params' => $params,
-        		'id' => $currentId
-        	);
+                'method' => $this->class . '.' . $method,
+                'params' => $params,
+                'id' => $this->id
+            );
         $opts = array ('http' => array (
                             'method'  => 'POST',
                             'header'  => 'Content-type: application/json',
-                            'content' => $request
+                            'content' => json_encode($request)
                             ));
         $context  = stream_context_create($opts);
         if ($fp = fopen($this->url, 'r', false, $context)) {
@@ -79,12 +79,14 @@ class jsonRPCClient {
             while($row = fgets($fp)) {
                 $response.= trim($row)."\n";
             }
+        echo "resp:".$response;
             $response = json_decode($response,true);
         } else {
             throw new Exception('Unable to connect to '.$this->url);
         }
         if (!$this->notification) {
             // check
+        print_r($response);
             if ($response['id'] != $currentId) {
                 throw new Exception('Incorrect response id (request id: '.$currentId.', response id: '.$response['id'].')');
             }
@@ -97,6 +99,6 @@ class jsonRPCClient {
             return true;
         }
 
-	}
+    }
 }
 ?>
