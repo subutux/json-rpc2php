@@ -26,10 +26,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * @author Stijn Van Campenhout <stijn.vancampenhout@gmail.com>
  * @version 1.0
  */
- function jsonrpcphp(host,mainCallback){
+ function jsonrpcphp(host,mainCallback,options){
+ 	defaultOptions = {
+ 		"ingoreErrors" : []
+ 	}
+ 	this.o = $.extend({},defaultOptions,options);
  	that = this;
  	this.host = host;
  	this.currId = 0;
+ 	this.err = function (code,msg,fullmsg){ 		
+ 		if (!$.inArray(msg,that.o.ignoreErrors)){
+			alert(code + "::" + msg + "::" + fullmsg);
+			console.log(msg);
+		}
+ 	}
  	/**
  	 * Main rpc function, wrapper for $.ajax();
  	 *
@@ -64,14 +74,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		  success: function(r){
 		  	console.log("success");
  			if (r.error != null){
- 				alert(r.error.code + "::" + r.error.message + "::" + r.error.data.fullMessage);
- 				console.log(r.error);
+ 				that.err(r.error.code,r.error.message,r.error.data.fullMessage)
+ 				/*alert(r.error.code + "::" + r.error.message + "::" + r.error.data.fullMessage);
+ 				console.log(r.error);*/
  				return false;
  			} else if (typeof r.id != "undefined"){
  				if (r.id == request.id){
  					callback(r);
  				} else {
- 					alert("jsonrpc2Error::NO_ID_MATCH::Given Id and recieved Id does not match");
+ 					//alert("jsonrpc2Error::NO_ID_MATCH::Given Id and recieved Id does not match");
+ 					that.err("jsonrpc2Error","NO_ID_MATCH","Given Id and recieved Id does not match");
  					return false;
  				}
  			} else {
