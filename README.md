@@ -30,9 +30,14 @@ Features javascript client library
 
 * uses the jQuery library
 
-Features PHP Client *NEW*
+Features PHP Client 
 -------------------------
 * Simple usage: Directly call object function from client class
+
+Features Python Client *NEW*
+----------------------------
+* Simple usage: Directly call object function from client class (the same as the PHP client)
+
 
 Example server
 --------------
@@ -81,3 +86,14 @@ Example PHP client
 	 	)
 	 */
 	 ?>
+Example Python client
+---------------------
+
+	import jsonrpc2php-pyclient
+	rpc = jsonrpc2client("http://server.hosting.api/api.php",'myClass')
+	print rpc.ping("testing one 2 three")
+	"""
+	Outputs:
+	{u'error': None, u'jsonrpc': u'2.0', u'id': 1, u'result': [u'pong:testing one 2 three']}
+	"""
+	
