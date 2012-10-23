@@ -90,8 +90,8 @@ Example Python client
 ---------------------
 
 	import jsonrpc2php-pyclient
-	rpc = jsonrpc2client("http://server.hosting.api/api.php",'myClass')
-	print rpc.ping("testing one 2 three")
+	myClass = jsonrpc2client("http://server.hosting.api/api.php",'myClass')
+	print myClass.ping("testing one 2 three")
 	"""
 	Outputs:
 	{u'error': None, u'jsonrpc': u'2.0', u'id': 1, u'result': [u'pong:testing one 2 three']}
