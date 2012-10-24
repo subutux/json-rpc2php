@@ -33,6 +33,7 @@ class jsonrpc2client(object):
 	defaultOptions = {
 	"ignoreErrors" : []
 	}
+	currId = 0
 	useClass = ""
 	apiMethods = []
 	def __init__(self,apiUrl,useClass,options=None):
@@ -43,14 +44,23 @@ class jsonrpc2client(object):
 				self.defaultOptions[i] = options[i]
 		returned = self.rpcCall('rpc.listMethods')
 		self.apiMethods = returned["result"][useClass]
-	def rpcCall(self,method,params=None):
+	def rpcCall(self,method,params=None,notification=False):
 		"""main function to call the rpc api"""
-		request = {
-		"jsonrpc" : "2.0",
-		"method" : method,
-		"params" : [],
-		"id" : 1
-		}
+		if notification is False:
+			self.currId = self.currId + 1
+			request = {
+			"jsonrpc" : "2.0",
+			"method" : method,
+			"params" : [],
+			"id" : self.currId
+			}
+		else:
+			request = {
+			"jsonrpc" : "2.0",
+			"method" : method,
+			"params" : []
+			}
+
 		if isinstance(params,str):
 			request["params"] = [params]
 		elif isinstance(params,list):
@@ -62,24 +72,27 @@ class jsonrpc2client(object):
 		req = urllib2.Request(self.host,headers = headers, data = jsonrequest)
 		fr = urllib2.urlopen(req)
 		f = fr.read()
-
-		f_obj = json.loads(f)
-		if f_obj["error"] is not None:
-			raise rpcException(f_obj["error"])
-		else:
-			return f_obj
+		if notification is False:
+			f_obj = json.loads(f)
+			if f_obj["error"] is not None:
+				raise rpcException(f_obj["error"])
+			else:
+				return f_obj
 	def __getattr__(self,method):
 		"""Magic!"""
-		arg = ['']
+		arg = ['',False]
 		if method in self.apiMethods:
 			def function(*args):
+				# Get the method arguments. If there are none provided, use the default.
 				try:
 					arg[0] = args[0]
-				except IndexError:
-					arg[0] = ''
+				except IndexError: pass
+				# check if notification param is set. If not, use default (False)
+				try:
+					arg[1] = args[1]
+				except IndexError: pass
 
-
-				return self.rpcCall(self.useClass + ".d" + method,arg[0])
+				return self.rpcCall(self.useClass + "." + method,arg[0],arg[1])
 			return function
 		else:
 			raise rpcException("Method unknown in class \"" + self.useClass + "\"")
