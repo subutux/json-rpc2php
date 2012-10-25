@@ -101,28 +101,22 @@ class jsonRPCServer {
 			if (isset($HTTPHeaders['x-rpc-auth-username']) && isset($HTTPHeaders['x-rpc-auth-password'])){
 				error_log("got user & pass headers");
 				if ($this->users[$HTTPHeaders['x-rpc-auth-username']] == $HTTPHeaders['x-rpc-auth-password']){
-					if (session_id() != ""){
-						error_log("destroying session " . session_id());
-						session_start();
-						session_unset();
-						session_destroy();
-
-					}
 					session_start();
 					$sid = session_id();
+					$_SESSION["ip"] = $_SERVER["REMOTE_ADDR"];
 					error_log("setting session header to ".$sid);
 					header('x-RPC-Auth-Session: ' . $sid);
 				} else {
-
 					error_log("no user found");
 					throw new Exception($this->errorCodes['authenticationError']);
 				}
 			} else if (isset($HTTPHeaders['x-rpc-auth-session'])){
+				session_id($HTTPHeaders['x-rpc-auth-session'])
 				session_start();
-				if (session_id() == $HTTPHeaders['x-rpc-auth-session']){
+				if ($_SESSION['ip'] == $_SERVER["REMOTE_ADDR"]){
 					return true;
 				} else {
-					error_log("session id does not match " . session_id().':'.$HTTPHeaders['x-rpc-auth-session']);
+					error_log("session id does not match remote ip");
 					throw new Exception($this->errorCodes['authenticationError']);
 				}
 			} else {
