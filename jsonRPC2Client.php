@@ -33,13 +33,33 @@ class jsonRPCClient {
     private $id;
     private $notification = false;
     private $class;
+    private $auth;
 
-    public function __construct($host,$class){
+    public function __construct($host,$class,$auth=array()){
         $this->url = $host;
         $this->class = $class;
         $this->id = 1;
+        $this->auth = $auth;
     }
+    private function constructHeaders(){
+        $headers = array(
+            "Content-type" => "application/json"
+            );
+        $rawHeader = "";
+        if (!empty($this->auth)){
+            if (isset($this->auth['sessionId'])){
+                $headers["X-RPC-Auth-Session"] = $this->auth['sessionId'];
+            } else {
 
+                $headers["X-RPC-Auth-Username"] = $this->auth['username'];
+                $headers["X-RPC-Auth-Password"] = $this->auth['password'];
+            }
+        }
+        foreach ($headers as $h => $c){
+            $rawHeader.=$h . ": " . $c . "\r\n";
+        }
+        return $rawHeader;
+    }
     private function setNotification($notify = false){
         $this->notification = $notify;
     }
@@ -70,11 +90,12 @@ class jsonRPCClient {
             );
         $opts = array ('http' => array (
                             'method'  => 'POST',
-                            'header'  => 'Content-type: application/json',
+                            'header'  => $this->constructHeaders(),
                             'content' => json_encode($request)
                             ));
         $context  = stream_context_create($opts);
         if ($fp = fopen($this->url, 'r', false, $context)) {
+            print_r($http_response_header);
             $response = '';
             while($row = fgets($fp)) {
                 $response.= trim($row)."\n";

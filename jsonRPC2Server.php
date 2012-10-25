@@ -38,7 +38,8 @@ class jsonRPCServer {
 		'-32600' => 'Invalid request',
 		'-32601' => 'Method not found',
 		'-32602' => 'Invalid parameters',
-		'-32603' => 'internal error',
+		'-32603' => 'Internal error',
+		'-32604' => 'Authentication error',
 		'-32000' => 'Extension not found'
 		);
 	private $errorMessagesFull = array(
@@ -47,17 +48,20 @@ class jsonRPCServer {
 		'-32601' => 'The method does not exist / is not available.',
 		'-32602' => 'Invalid method parameters.',
 		'-32603' => 'Internal Server error.',
-		'-32000' => 'The requested extension does not exist / is not available.'
+		'-32000' => 'The requested extension does not exist / is not available.',
+		'-32604' => 'User unknown / Password / Session id incorrect.'
 		);
 	
 	private $errorCodes = array(
-		'parseError' 		=> '-32700',
-		'invalidRequest'	=> '-32600',
-		'methodNotFound'	=> '-32601',
-		'invalidParameters'	=> '-32602',
-		'internalError'		=> '-32603',
-		'extensionNotFound'	=> '-32000'
+		'parseError' 			=> '-32700',
+		'invalidRequest'		=> '-32600',
+		'methodNotFound'		=> '-32601',
+		'invalidParameters'		=> '-32602',
+		'internalError'			=> '-32603',
+		'authenticationError'	=> '-32604',
+		'extensionNotFound'		=> '-32000'
 		);
+	private $users = array();
 	/**
 	 * Register a class as an extension
 	 * methods will be available as [class].[method]
@@ -70,10 +74,74 @@ class jsonRPCServer {
 		return true;
 	}
 	/**
+	 * Adds a user that's allowed to access the RPC
+	 * @param  string $user     Username
+	 * @param  string $password Password
+	 * @return Bool             Return true
+	 */
+	public function registerUser($user,$password){
+		$this->users[$user] = $password;
+		error_log("got user register request");
+		foreach ($this->users as $user => $pass){
+			error_log("user:" . $user . ":" . $pass);
+		}
+		return true;
+	}
+	/**
+	 * Handles the authentication
+	 * @param  Array $HTTPHeaders Contains the apache_request_headers()
+	 */
+	private function authenticate($HTTPHeaders){
+		error_log("authenticate");
+		foreach($HTTPHeaders as $i => $c){
+			$HTTPHeaders[strtolower($i)] = $c;
+			error_log("header::" . $i . ": " . $c);
+		}
+		try {
+			if (isset($HTTPHeaders['x-rpc-auth-username']) && isset($HTTPHeaders['x-rpc-auth-password'])){
+				error_log("got user & pass headers");
+				if ($this->users[$HTTPHeaders['x-rpc-auth-username']] == $HTTPHeaders['x-rpc-auth-password']){
+					if (session_id() != ""){
+						error_log("destroying session " . session_id());
+						session_start();
+						session_unset();
+						session_destroy();
+
+					}
+					session_start();
+					$sid = session_id();
+					error_log("setting session header to ".$sid);
+					header('x-RPC-Auth-Session: ' . $sid);
+				} else {
+
+					error_log("no user found");
+					throw new Exception($this->errorCodes['authenticationError']);
+				}
+			} else if (isset($HTTPHeaders['x-rpc-auth-session'])){
+				session_start();
+				if (session_id() == $HTTPHeaders['x-rpc-auth-session']){
+					return true;
+				} else {
+					error_log("session id does not match " . session_id().':'.$HTTPHeaders['x-rpc-auth-session']);
+					throw new Exception($this->errorCodes['authenticationError']);
+				}
+			} else {
+					error_log("No authentication recieved");
+					throw new Exception($this->errorCodes['authenticationError']);
+			} 
+		} catch (Exception $e) {
+				error_log("got exception");
+				$this->error($e->getMessage());
+				$this->sendResponse();
+				return false;
+		}
+	}
+	/**
 	 * responses to 'rpc.' calls.
 	 *
 	 */
 	 public function rpcCalls() {
+
 	 	if ($this->request['method'] == "listMethods"){
 	 		foreach ($this->classes as $ext => $class){
 	 			$methods[$ext] = get_class_methods($class);
@@ -106,7 +174,9 @@ class jsonRPCServer {
 	 * @return boolean
 	 */
 	private function validate() {
-		try {
+
+
+		// try {
 			if ($_SERVER['REQUEST_METHOD'] != 'POST' || empty($_SERVER['CONTENT_TYPE']) || strpos($_SERVER['CONTENT_TYPE'], 'application/json') === false) {
 				throw new Exception($this->errorCodes['invalidRequest']);
 			}
@@ -124,11 +194,11 @@ class jsonRPCServer {
 				throw new Exception($this->errorCodes['methodNotFound']);
 			};
 	
-		} catch (Exception $e) {
+		/*} catch (Exception $e) {
 				$this->error($e->getMessage());
 				$this->sendResponse();
 				return false;
-		}
+		}*/
 		return true;
 	}
 	/**
@@ -191,10 +261,14 @@ class jsonRPCServer {
 	 *
 	 */
 	public function handle() {
-		
+		/* If there are no users defined, don't use authentication */
+
 		$this->validate();
 
 		try {
+			if (!empty($this->users)){
+	 			$this->authenticate(apache_request_headers());
+	 		}
 			if ($this->extension == "rpc"){
 				$this->rpcCalls();
 			}

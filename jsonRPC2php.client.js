@@ -28,7 +28,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  function jsonrpcphp(host,mainCallback,options){
  	defaultOptions = {
- 		"ingoreErrors" : []
+ 		"ingoreErrors" : [],
+ 		"username" : "",
+ 		"password" : ""
  	}
  	this.o = $.extend({},defaultOptions,options);
  	that = this;
@@ -61,17 +63,35 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  			this.currId += 1;
  			request.id = this.currId;
  		}
+ 		function setHeaders(xhr){
+ 			if (typeof(that.o['sessionId']) != "undefined"){
+ 				xhr.setRequestHeader("x-RPC-Auth-Session",that.o['sessionId'])
+ 			} else if (that.o['username'] != "" && that.o['password'] != ""){
+ 				xhr.setRequestHeader("x-RPC-Auth-Username",that.o['username'])
+ 				xhr.setRequestHeader("x-RPC-Auth-Password",that.o['password'])
+ 			}
+ 		}
  		$.ajax({
 		  url:host,
 		  type:"POST",
 		  data:JSON.stringify(request),
 		  contentType:"application/json",
 		  dataType:"json",
+		  beforeSend: function(xhr){
+		  	setHeaders(xhr);
+		  },
 		  error: function(jqXHR,textStatus){
 		  	alert('error:' + textStatus);
 		  	return false;
 		  },
-		  success: function(r){
+		  success: function(r,textStatus,XMLHttpRequest){
+		  	var sessionId = XMLHttpRequest.getResponseHeader("x-RPC-Auth-Session");
+		  	console.log(sessionId);
+		  	console.lo
+		  	if (typeof(sessionId) == "string"){
+		  		that.o['sessionId'] = sessionId;
+		  	}
+		  	console.log(that.o);
 		  	console.log("success");
  			if (r.error != null){
  				that.err(r.error.code,r.error.message,r.error.data.fullMessage)

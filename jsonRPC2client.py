@@ -31,7 +31,10 @@ class jsonrpc2client(object):
 	"""Jsonrcp2php client for python"""
 	host = ""
 	defaultOptions = {
-	"ignoreErrors" : []
+	"ignoreErrors" : [],
+	"username" : "",
+	"password" : "",
+	"sessionId" : ""
 	}
 	currId = 0
 	useClass = ""
@@ -69,8 +72,18 @@ class jsonrpc2client(object):
 			request["params"] = ''
 		jsonrequest = json.dumps(request)
 		headers = {"Content-Type": "application/json","Content-lenght":str(len(jsonrequest))}
+		if self.defaultOptions["username"] is not "" and self.defaultOptions["password"] is not "":
+			if self.defaultOptions["sessionId"] is "":
+					headers['x-RPC-Auth-Username'] = self.defaultOptions["username"]
+					headers['x-RPC-Auth-Password'] = self.defaultOptions["password"]
+			else:
+				headers['x-RPC-Auth-Session'] = self.defaultOptions['sessionId']
+		print headers
 		req = urllib2.Request(self.host,headers = headers, data = jsonrequest)
 		fr = urllib2.urlopen(req)
+		sessionId = fr.info().getheader('x-RPC-Auth-Session')
+		if type(sessionId) is str:
+			self.defaultOptions["sessionId"] = sessionId
 		f = fr.read()
 		if notification is False:
 			f_obj = json.loads(f)
@@ -108,3 +121,5 @@ class rpcException(Exception):
 		else:
 			message = jsonrpc2Error
 		Exception.__init__(self, message)
+rpc = jsonrpc2client("http://localhost/json-rpc2php/api.php","myClass",{"username":"test","password":"test"})
+print rpc.ping("test")
