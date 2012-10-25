@@ -97,7 +97,7 @@ class jsonRPCServer {
 			$HTTPHeaders[strtolower($i)] = $c;
 			error_log("header::" . $i . ": " . $c);
 		}
-		try {
+		// try {
 			if (isset($HTTPHeaders['x-rpc-auth-username']) && isset($HTTPHeaders['x-rpc-auth-password'])){
 				error_log("got user & pass headers");
 				if ($this->users[$HTTPHeaders['x-rpc-auth-username']] == $HTTPHeaders['x-rpc-auth-password']){
@@ -129,12 +129,12 @@ class jsonRPCServer {
 					error_log("No authentication recieved");
 					throw new Exception($this->errorCodes['authenticationError']);
 			} 
-		} catch (Exception $e) {
-				error_log("got exception");
-				$this->error($e->getMessage());
-				$this->sendResponse();
-				return false;
-		}
+		// } catch (Exception $e) {
+		// 		error_log("got exception");
+		// 		$this->error($e->getMessage());
+		// 		$this->sendResponse();
+		// 		return false;
+		// }
 	}
 	/**
 	 * responses to 'rpc.' calls.
@@ -176,7 +176,7 @@ class jsonRPCServer {
 	private function validate() {
 
 
-		// try {
+		try {
 			if ($_SERVER['REQUEST_METHOD'] != 'POST' || empty($_SERVER['CONTENT_TYPE']) || strpos($_SERVER['CONTENT_TYPE'], 'application/json') === false) {
 				throw new Exception($this->errorCodes['invalidRequest']);
 			}
@@ -194,11 +194,11 @@ class jsonRPCServer {
 				throw new Exception($this->errorCodes['methodNotFound']);
 			};
 	
-		/*} catch (Exception $e) {
+		} catch (Exception $e) {
 				$this->error($e->getMessage());
 				$this->sendResponse();
 				return false;
-		}*/
+		}
 		return true;
 	}
 	/**
