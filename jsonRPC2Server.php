@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * original idea from jsonrpcphp class of Sergio Vaccaro <sergio@inservibile.org>, http://jsonrpcphp.org/
  * @author stijn <stijn.vancampenhout@gmail.com>
+ * @version  1.2
  */
 class jsonRPCServer {
 	public $classes = array();
@@ -81,9 +82,7 @@ class jsonRPCServer {
 	 */
 	public function registerUser($user,$password){
 		$this->users[$user] = $password;
-		error_log("got user register request");
 		foreach ($this->users as $user => $pass){
-			error_log("user:" . $user . ":" . $pass);
 		}
 		return true;
 	}
@@ -92,43 +91,30 @@ class jsonRPCServer {
 	 * @param  Array $HTTPHeaders Contains the apache_request_headers()
 	 */
 	private function authenticate($HTTPHeaders){
-		error_log("authenticate");
 		foreach($HTTPHeaders as $i => $c){
 			$HTTPHeaders[strtolower($i)] = $c;
-			error_log("header::" . $i . ": " . $c);
 		}
-		// try {
-			if (isset($HTTPHeaders['x-rpc-auth-username']) && isset($HTTPHeaders['x-rpc-auth-password'])){
-				error_log("got user & pass headers");
-				if ($this->users[$HTTPHeaders['x-rpc-auth-username']] == $HTTPHeaders['x-rpc-auth-password']){
-					session_start();
-					$sid = session_id();
-					$_SESSION["ip"] = $_SERVER["REMOTE_ADDR"];
-					error_log("setting session header to ".$sid);
-					header('x-RPC-Auth-Session: ' . $sid);
-				} else {
-					error_log("no user found");
-					throw new Exception($this->errorCodes['authenticationError']);
-				}
-			} else if (isset($HTTPHeaders['x-rpc-auth-session'])){
-				session_id($HTTPHeaders['x-rpc-auth-session']);
+		if (isset($HTTPHeaders['x-rpc-auth-username']) && isset($HTTPHeaders['x-rpc-auth-password'])){
+			if ($this->users[$HTTPHeaders['x-rpc-auth-username']] == $HTTPHeaders['x-rpc-auth-password']){
 				session_start();
-				if ($_SESSION['ip'] == $_SERVER["REMOTE_ADDR"]){
-					return true;
-				} else {
-					error_log("session id does not match remote ip");
-					throw new Exception($this->errorCodes['authenticationError']);
-				}
+				$sid = session_id();
+				$_SESSION["ip"] = $_SERVER["REMOTE_ADDR"];
+				header('x-RPC-Auth-Session: ' . $sid);
 			} else {
-					error_log("No authentication recieved");
-					throw new Exception($this->errorCodes['authenticationError']);
-			} 
-		// } catch (Exception $e) {
-		// 		error_log("got exception");
-		// 		$this->error($e->getMessage());
-		// 		$this->sendResponse();
-		// 		return false;
-		// }
+				throw new Exception($this->errorCodes['authenticationError']);
+			}
+		} else if (isset($HTTPHeaders['x-rpc-auth-session'])){
+			session_id($HTTPHeaders['x-rpc-auth-session']);
+			session_start();
+			if ($_SESSION['ip'] == $_SERVER["REMOTE_ADDR"]){
+				return true;
+			} else {
+				throw new Exception($this->errorCodes['authenticationError']);
+			}
+		} else {
+				throw new Exception($this->errorCodes['authenticationError']);
+		} 
+
 	}
 	/**
 	 * responses to 'rpc.' calls.

@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * original idea from jsonrpcphp class of Sergio Vaccaro <sergio@inservibile.org>, http://jsonrpcphp.org/
  * @author stijn <stijn.vancampenhout@gmail.com>
+ * @version 1.2
  */
 class jsonRPCClient {
     private $url;

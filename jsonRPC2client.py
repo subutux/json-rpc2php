@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 """
 __name__    = "jsonrcp2client"
 __author__  = "Stijn Van Campenhout <stijn.vancampenhout@gmail.com>"
-__version__ = 1
+__version__ = 1,2
 __detail__  = "For use with http://github.com/subutux/json-rpc2php/"
 
 import json
@@ -121,7 +121,3 @@ class rpcException(Exception):
 		else:
 			message = jsonrpc2Error
 		Exception.__init__(self, message)
-rpc = jsonrpc2client("http://localhost/json-rpc2php/api.php","myClass",{"username":"test","password":"test"})
-print rpc.ping("test")
-print rpc.ping("test")
-print rpc.ping("test")

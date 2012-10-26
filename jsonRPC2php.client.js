@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * jsonrpc2php client for javascript
  * for use with http://github.com/subutux/json-rpc2php/
  * @author Stijn Van Campenhout <stijn.vancampenhout@gmail.com>
- * @version 1.0
+ * @version 1.2
  */
  function jsonrpcphp(host,mainCallback,options){
  	defaultOptions = {
