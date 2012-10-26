@@ -3,8 +3,15 @@ json-rpc2php
 json-rpc2php ?
 --------------
 
-json-rpc2php is a php and javascript library.
-contains a php json-rpc version 2.0 server and a javascript json-rpc version 2.0 client
+json-rpc2php is a flexible PHP JSON-RPC2 server.
+it contains the following:
+* The json-RPC2 PHP server
+
+* a json-RPC2 client in PHP
+
+* a json-RPC2 client in Javascript (using jQuery)
+
+* a json-RPC2 client in Python (using urllib2 and json)
 
 Open Source
 ------------
@@ -21,6 +28,9 @@ Features php server
 
 * supports rpc.listMethods : array of class => methods
 
+* Supports simple authentication (using session header in requests)
+
+By default, the server doesn't use authentication. Authentication is only used when there is minimum one defined user. You can define users by using the "jsonRPC2PHP->registerUser(user,pass)" function.
 
 Features javascript client library
 ----------------------------------
@@ -30,14 +40,19 @@ Features javascript client library
 
 * uses the jQuery library
 
+Authentication is is used when you define a username and password variable in the Options
+
 Features PHP Client 
 -------------------------
 * Simple usage: Directly call object function from client class
+
+Authentication is used when you pass an array containing "username" => "" and "password" => "" to the class init as the last parameter
 
 Features Python Client *NEW*
 ----------------------------
 * Simple usage: Directly call object function from client class (the same as the PHP client)
 
+Authentication is is used when you define a username and password variable in the Options
 
 Example server
 --------------
