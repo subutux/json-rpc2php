@@ -111,7 +111,7 @@ class jsonRPCServer {
 					throw new Exception($this->errorCodes['authenticationError']);
 				}
 			} else if (isset($HTTPHeaders['x-rpc-auth-session'])){
-				session_id($HTTPHeaders['x-rpc-auth-session'])
+				session_id($HTTPHeaders['x-rpc-auth-session']);
 				session_start();
 				if ($_SESSION['ip'] == $_SERVER["REMOTE_ADDR"]){
 					return true;

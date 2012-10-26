@@ -123,3 +123,5 @@ class rpcException(Exception):
 		Exception.__init__(self, message)
 rpc = jsonrpc2client("http://localhost/json-rpc2php/api.php","myClass",{"username":"test","password":"test"})
 print rpc.ping("test")
+print rpc.ping("test")
+print rpc.ping("test")

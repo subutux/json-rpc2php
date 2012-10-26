@@ -60,6 +60,19 @@ class jsonRPCClient {
         }
         return $rawHeader;
     }
+    /**
+     * Parses the $http_response_headers
+     * @param  array $headers contains the http_response_headers array
+     * @return array          proper header array
+     */
+    private function parseHeaders($headers){
+        $nHeaders = array();
+        foreach ($headers as $header) {
+            $h = explode(": ", $header);
+            $nHeaders[$h[0]] = $h[1];
+        }
+        return $nHeaders;
+    }
     private function setNotification($notify = false){
         $this->notification = $notify;
     }
@@ -95,7 +108,12 @@ class jsonRPCClient {
                             ));
         $context  = stream_context_create($opts);
         if ($fp = fopen($this->url, 'r', false, $context)) {
-            print_r($http_response_header);
+            $h = $this->parseHeaders($http_response_header);
+            print_r($h);
+            if (isset($h['x-RPC-Auth-Session'])){
+                print("setting session id to " . $h['x-RPC-Auth-Session']);
+                $this->auth['sessionId'] = $h['x-RPC-Auth-Session'];
+            }
             $response = '';
             while($row = fgets($fp)) {
                 $response.= trim($row)."\n";
