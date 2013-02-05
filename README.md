@@ -58,57 +58,66 @@ Example server
 --------------
 * api.php
 
-		<?php
-		require_once('my.class.php');
-		require_once('jsonRPC2Server.php');
-		$myClass = new myClass();
-		$jsonRpc = new jsonRPCServer();
-		$jsonRpc->registerClass($myClass);
-		$jsonRpc->handle() or die('no request');
-		?>
-
+```php
+<?php
+require_once('my.class.php');
+require_once('jsonRPC2Server.php');
+$myClass = new myClass();
+$jsonRpc = new jsonRPCServer();
+$jsonRpc->registerClass($myClass);
+$jsonRpc->handle() or die('no request');
+?>
+```
 * my.class.php
 
-		<?php
-		class myClass {
-			public function ping($msg) {
-				return "pong:" . $msg;
-			}
-		}
-		?>
+```php
+<?php
+class myClass {
+	public function ping($msg) {
+		return "pong:" . $msg;
+	}
+}
+?>
+```
 
 Example javascript client
 ------------------------
-
-	<script type="javascript/text" src="jsonrpc2php.client.js"></script>
-	<script>
-	var rpc = new jsonrpcphp('api.php',function(){
-		rpc.myClass.ping("hello world!",function(jsonRpcObj){
-			alert(jsonRpcObj.return);
-		});
+```html
+<script type="javascript/text" src="jsonrpc2php.client.js"></script>
+<script>
+var rpc = new jsonrpcphp('api.php',function(){
+	rpc.myClass.ping("hello world!",function(jsonRpcObj){
+		alert(jsonRpcObj.return);
 	});
-	</script>
+});
+</script>
+```
 Example PHP client
 ------------------
 
-	 <?php
-	 require_once 'jsonRPC2Client.php';
-	 $myClass = new jsonRPCClient('http://server.hosting.api/api.php','myClass');
-	 print_r($myClass->ping('testing one 2 three.'));
-	 /* Outputs:
-	 	Array (
-	 		[0] => "pong:testing one 2 three"
-	 	)
-	 */
-	 ?>
+```php
+<?php
+require_once 'jsonRPC2Client.php';
+$myClass = new jsonRPCClient('http://server.hosting.api/api.php','myClass');
+print_r($myClass->ping('testing one 2 three.'));
+/* Outputs:
+ 	Array (
+ 		[0] => "pong:testing one 2 three"
+	)
+*/
+?>
+```
+
 Example Python client
 ---------------------
 
-	import jsonrpc2php-pyclient
-	myClass = jsonrpc2client("http://server.hosting.api/api.php",'myClass')
-	print myClass.ping("testing one 2 three")
-	"""
-	Outputs:
-	{u'error': None, u'jsonrpc': u'2.0', u'id': 1, u'result': [u'pong:testing one 2 three']}
-	"""
+```python
+import jsonrpc2php-pyclient
+myClass = jsonrpc2client("http://server.hosting.api/api.php",'myClass')
+print myClass.ping("testing one 2 three")
+"""
+Outputs:
+{u'error': None, u'jsonrpc': u'2.0', u'id': 1, u'result': [u'pong:testing one 2 three']}
+"""
+```
 	
