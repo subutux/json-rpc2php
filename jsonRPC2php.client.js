@@ -86,13 +86,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		  },
 		  success: function(r,textStatus,XMLHttpRequest){
 		  	var sessionId = XMLHttpRequest.getResponseHeader("x-RPC-Auth-Session");
-		  	console.log(sessionId);
-		  	console.lo
 		  	if (typeof(sessionId) == "string"){
 		  		that.o['sessionId'] = sessionId;
 		  	}
-		  	console.log(that.o);
-		  	console.log("success");
  			if (r.error != null){
  				that.err(r.error.code,r.error.message,r.error.data.fullMessage)
  				/*alert(r.error.code + "::" + r.error.message + "::" + r.error.data.fullMessage);
