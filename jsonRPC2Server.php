@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 /*
 					COPYRIGHT
 
@@ -170,7 +171,8 @@ class jsonRPCServer {
 				throw new Exception($this->errorCodes['extensionNotFound']);
 			}
 			$this->request['method'] = $requestMethod[1];
-			if (!method_exists($this->classes[$this->extension],$this->request['method']) && $this->extension != "rpc"){
+			
+			if (!isset($this->classes[$this->extension]) && !method_exists($this->classes[$this->extension],$this->request['method']) && $this->extension != "rpc"){
 				throw new Exception($this->errorCodes['methodNotFound']);
 			};
 	
@@ -188,7 +190,7 @@ class jsonRPCServer {
 	 * @param string $c the error code
 	 * @param string $fmsg the full message of the error
 	 */
-	private function error($c,$fmsg=false){
+	private function error($c,$fmsg=false,$errorData = Array('no data')){
 		$this->response = array (
 				'jsonrpc'	=> '2.0',
 				'id' => (isset($this->request['id'])) ? $this->request['id'] : NULL,
@@ -200,7 +202,8 @@ class jsonRPCServer {
 					'data'	=> array(
 						'request' => (isset($this->request)) ? $this->request : NULL,
 						'extension' => (isset($this->extension)) ? $this->extension : NULL,
-						'fullMessage' => ($fmsg) ? $fmsg : $this->errorMessagesFull[$c]
+						'fullMessage' => ($fmsg) ? $fmsg : $this->errorMessagesFull[$c],
+						'debugData' => $errorData
 						)
 					)
 				);
@@ -242,8 +245,9 @@ class jsonRPCServer {
 	 */
 	public function handle() {
 		/* If there are no users defined, don't use authentication */
-
-		$this->validate();
+		if ($this->extension != "rpc"){
+			$this->validate();
+		}
 
 		try {
 			if (!empty($this->users)){
@@ -254,18 +258,34 @@ class jsonRPCServer {
 			}
 			$obj = $this->classes[$this->extension];
 		
-			if (($result = @call_user_func_array(array($obj,$this->request['method']),$this->request['params'])) !== false) {
+			if (($result = call_user_func_array(array($obj,$this->request['method']),$this->request['params'])) !== false) {
 				$this->ok((is_array($result)) ? $result : Array($result));
 			} else {
-				throw new Exception('Method function returned false.');
+				throw new jsonRPCException('Method function returned false.');
 			}
-		} catch (Exception $e) {
-				$c = ($e->getCode() != 0) ? $e->getCode : $this->errorCodes['internalError'];
-				$this->error($c,$e->getMessage());
+		} catch (jsonRPCException $e) {
+				$c = ($e->getCode() != 0) ? $e->getCode() : $this->errorCodes['internalError'];
+				$this->error($c,$e->getMessage(),$e->_getErrorData());
 		}
 		$this->sendResponse();
 		return true;
 	}
 
+}
+Class jsonRPCException extends Exception {
+	private $_errorData;
+
+	public function __construct($message,
+								$code = 0,
+								Exception $previous = null,
+								$errorData = Array('no data'))
+	{
+		parent::__construct($message,$code,$previous);
+		$this->_errorData = $errorData;
+	}
+
+	public function _getErrorData(){
+		return $this->_errorData;
+	}
 }
 ?>
