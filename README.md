@@ -13,6 +13,8 @@ it contains the following:
 
 * a json-RPC2 client in Python (using urllib2 and json)
 
+* *NEW* a json-RPC2 client library in Vala (using json-glib-1.0 and libsoup-2.4)
+
 Open Source
 ------------
 
@@ -43,16 +45,39 @@ Features javascript client library
 Authentication is is used when you define a username and password variable in the Options
 
 Features PHP Client 
--------------------------
+-------------------
 * Simple usage: Directly call object function from client class
 
 Authentication is used when you pass an array containing "username" => "" and "password" => "" to the class init as the last parameter
 
-Features Python Client *NEW*
-----------------------------
+Features Python Client
+----------------------
 * Simple usage: Directly call object function from client class (the same as the PHP client)
 
 Authentication is is used when you define a username and password variable in the Options
+
+Features Vala (or raw C) Client *NEW*
+-------------------------------------
+
+Overhall functionallity is the same as the php & python client, except for
+executing the request. this is done by `JsonRPC2.JsonRPC2client.request(string method, string[] params)`
+
+Supports authentication using the `JsonRPC2.JsonRPC2client.authenticate(username,password)`
+
+Compilation of the library is as followed:
+
+```bash
+valac --pkg json-glib-1.0 --pkg libsoup-2.4 --library=JsonRPC2 -H JsonRPC2.h jsonrpc2.vala -X -fPIC -X -shared -o JsonRPC2.so
+```
+
+Compilation against the library:
+
+```bash
+valac --pkg json-glib-1.0 --pkg libsoup-2.4 JsonRPC2.vapi your-vala-project.vala -X JsonRPC2.so -X -I . -o your-vala-project
+```
+
+This is my first Vala library. Any improvements are welcome.
+
 
 Example server
 --------------
@@ -120,4 +145,7 @@ Outputs:
 {u'error': None, u'jsonrpc': u'2.0', u'id': 1, u'result': [u'pong:testing one 2 three']}
 """
 ```
-	
+Example Vala client
+-------------------
+
+See examples/example.vala
