@@ -34,6 +34,7 @@ namespace JsonRPC2 {
 		private bool debug;
 		private string[] auth;
 		private string RpcSessionId;
+		private int requestId;
 		public SessionAsync Session;
 
 		public JsonRPC2client (string url, string rClass) {
@@ -42,6 +43,7 @@ namespace JsonRPC2 {
 			remoteClass = rClass;
 			debug = false;
 			auth = {"",""};
+			requestId = 0;
 		}
 		public void authenticate(string username,string password){
 			auth = {username,password};
@@ -54,6 +56,8 @@ namespace JsonRPC2 {
 			size_t lenght;
 			string request;
 			string returned;
+
+			requestId = requestId + 1;
 			var jsonRequest = new Json.Object();
 			var jsonRoot = new Json.Node(NodeType.OBJECT);
 			var jsonGen = new Generator();
@@ -67,7 +71,7 @@ namespace JsonRPC2 {
 			jsonRequest.set_string_member("jsonrpc","2.0");
 			jsonRequest.set_string_member("method",remoteClass + "." + module);
 			jsonRequest.set_array_member("params",jsonParameters);
-			jsonRequest.set_int_member("id",1);
+			jsonRequest.set_int_member("id",requestId);
 			request = jsonGen.to_data(out lenght);
 			if (debug)
 				stdout.printf("<-- Sending: %s\n", request);
