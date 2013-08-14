@@ -1,2 +1,4 @@
-.DS_Store
+example.json.soup.vala
+example_json.vala
 jsonRPCclient.php
+.DS_Store
