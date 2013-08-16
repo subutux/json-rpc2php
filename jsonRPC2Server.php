@@ -1,6 +1,6 @@
 <?php
 header('content-type: application/json');
-error_reporting(0);
+error_reporting(E_ALL);
 /*
 					COPYRIGHT
 
@@ -117,7 +117,7 @@ class jsonRPCServer {
 				$_SESSION["ip"] = $_SERVER["REMOTE_ADDR"];
 				header('x-RPC-Auth-Session: ' . $sid);
 			} else {
-				throw new Exception($this->errorCodes['authenticationError']);
+				throw new jsonRPCException("password did not match",$this->errorCodes['authenticationError']);
 			}
 		} else if (isset($HTTPHeaders['x-rpc-auth-session'])){
 			session_id($HTTPHeaders['x-rpc-auth-session']);
@@ -125,10 +125,10 @@ class jsonRPCServer {
 			if ($_SESSION['ip'] == $_SERVER["REMOTE_ADDR"]){
 				return true;
 			} else {
-				throw new Exception($this->errorCodes['authenticationError']);
+				throw new jsonRPCException("Session id not for this ip",$this->errorCodes['authenticationError']);
 			}
 		} else {
-				throw new Exception($this->errorCodes['authenticationError']);
+				throw new jsonRPCException("no auth headers found",$this->errorCodes['authenticationError']);
 		} 
 
 	}
@@ -166,10 +166,12 @@ class jsonRPCServer {
 	 * 
 	 **/
 	 private function getData() {
-	 	try {
+
 	 		$this->rawData = json_decode(file_get_contents('php://input'),true);
-	 		$this->isBatch = $this->is_assoc($this->rawData);
-	 	}
+	 		error_log("getData:rawData:".json_encode($this->rawData));
+	 		$this->isBatch = !$this->is_assoc($this->rawData);
+
+
 	 }
 	/**
 	 * This function validates the incoming json string
@@ -191,6 +193,7 @@ class jsonRPCServer {
 			if (empty($this->request)){
 				throw new jsonRPCException($this->errorCodes['parseError']);
 			}
+			error_log("current request:".$this->request['method']);
 			$requestMethod = explode('.',$this->request['method']);
 			$this->extension = $requestMethod[0];
 			if (!isset($this->classes[$this->extension]) && $this->extension != "rpc"){
@@ -247,6 +250,7 @@ class jsonRPCServer {
   } 
 	private function ok($result){
 					//print_r($result);
+					$this->request['id'] = (!isset($this->request['id']))? "" : $this->request['id'];
 					$this->batchresponses[] = array (
 						'jsonrpc'	=> '2.0',
 						'id' => $this->request['id'],
@@ -260,8 +264,9 @@ class jsonRPCServer {
 	 */
 	private function sendResponse(){
 		//if we got only one request, a.k.a no batch
-		if (count($this->batchresponses) === 1) {
-			if (!empty($this->request['id'])) { // notifications don't want response
+		if (count($this->batchresponses) == 1) {
+			$this->response = $this->batchresponses[0];
+			if (!empty($this->response['id'])) { // notifications don't want response
 				die( json_encode($this->response) );
 			}	
 		} else {
@@ -283,13 +288,15 @@ class jsonRPCServer {
 	public function handle() {
 		//readin the data
 		$this->getData();
-
+		error_log("batch:".$this->isBatch."\nrawData:".json_encode($this->rawData));
 		if (!$this->isBatch) {
 			//encapsulate the data into an array.
 			$this->rawData = array($this->rawData);
 		}
 		foreach ($this->rawData as $request) {
-			$this->request = $request
+			error_log('foreach request:'.json_encode($request));
+
+			$this->request = $request;
 			if ($this->validate()){
 			
 				try {
