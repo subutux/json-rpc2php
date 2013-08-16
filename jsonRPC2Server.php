@@ -1,4 +1,5 @@
 <?php
+header('content-type: application/json');
 error_reporting(0);
 /*
 					COPYRIGHT
@@ -33,8 +34,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 class jsonRPCServer {
 	public $classes = array();
 	public $request;
+	private $rawData;
 	public $extension;
 	public $response;
+	private $batchresponses = array();
 	private $errorMessages = array(
 		'-32700' => 'Parse error',
 		'-32600' => 'Invalid request',
@@ -64,6 +67,18 @@ class jsonRPCServer {
 		'extensionNotFound'		=> '-32000'
 		);
 	private $users = array();
+	/**
+	* is_assoc: Detects if an array is an associated array
+	*
+	* source: http://stackoverflow.com/a/4254008
+	*
+	* @param array the array to define
+	* @return Bool returns true if assoc array
+	**/
+	private function is_assoc($array) {
+  		return (bool)count(array_filter(array_keys($array), 'is_string'));
+	}
+
 	/**
 	 * Register a class as an extension
 	 * methods will be available as [class].[method]
@@ -145,6 +160,17 @@ class jsonRPCServer {
 	 	}
 	 	return true;
 	 }
+	 /**
+	 * getData: gets the raw input data
+	 * 
+	 * 
+	 **/
+	 private function getData() {
+	 	try {
+	 		$this->rawData = json_decode(file_get_contents('php://input'),true);
+	 		$this->isBatch = $this->is_assoc($this->rawData);
+	 	}
+	 }
 	/**
 	 * This function validates the incoming json string
 	 * - checks the request method
@@ -159,26 +185,26 @@ class jsonRPCServer {
 
 		try {
 			if ($_SERVER['REQUEST_METHOD'] != 'POST' || empty($_SERVER['CONTENT_TYPE']) || strpos($_SERVER['CONTENT_TYPE'], 'application/json') === false) {
-				throw new Exception($this->errorCodes['invalidRequest']);
+				throw new jsonRPCException($this->errorCodes['invalidRequest']);
 			}
-			$this->request = json_decode(file_get_contents('php://input'),true);
+			//$this->request = json_decode(file_get_contents('php://input'),true);
 			if (empty($this->request)){
-				throw new Exception($this->errorCodes['parseError']);
+				throw new jsonRPCException($this->errorCodes['parseError']);
 			}
 			$requestMethod = explode('.',$this->request['method']);
 			$this->extension = $requestMethod[0];
 			if (!isset($this->classes[$this->extension]) && $this->extension != "rpc"){
-				throw new Exception($this->errorCodes['extensionNotFound']);
+				throw new jsonRPCException($this->errorCodes['extensionNotFound']);
 			}
 			$this->request['method'] = $requestMethod[1];
 			
 			if (!isset($this->classes[$this->extension]) && !method_exists($this->classes[$this->extension],$this->request['method']) && $this->extension != "rpc"){
-				throw new Exception($this->errorCodes['methodNotFound']);
+				throw new jsonRPCException($this->errorCodes['methodNotFound']);
 			};
 	
-		} catch (Exception $e) {
+		} catch (jsonRPCException $e) {
 				$this->error($e->getMessage());
-				$this->sendResponse();
+				//$this->sendResponse();
 				return false;
 		}
 		return true;
@@ -191,7 +217,7 @@ class jsonRPCServer {
 	 * @param string $fmsg the full message of the error
 	 */
 	private function error($c,$fmsg=false,$errorData = Array('no data')){
-		$this->response = array (
+		$this->batchresponses[] = array (
 				'jsonrpc'	=> '2.0',
 				'id' => (isset($this->request['id'])) ? $this->request['id'] : NULL,
 				'result' => NULL,
@@ -221,7 +247,7 @@ class jsonRPCServer {
   } 
 	private function ok($result){
 					//print_r($result);
-					$this->response = array (
+					$this->batchresponses[] = array (
 						'jsonrpc'	=> '2.0',
 						'id' => $this->request['id'],
 						'result' => $result,
@@ -233,10 +259,21 @@ class jsonRPCServer {
 	 *
 	 */
 	private function sendResponse(){
-		if (!empty($this->request['id'])) { // notifications don't want response
-			header('content-type: application/json');
-			die( json_encode($this->response) );
+		//if we got only one request, a.k.a no batch
+		if (count($this->batchresponses) === 1) {
+			if (!empty($this->request['id'])) { // notifications don't want response
+				die( json_encode($this->response) );
+			}	
+		} else {
+			foreach ($this->batchresponses as $response) {
+				if (!empty($response['id'])){
+					$this->response[] = $response;
+				}
+			}
 		}
+
+		die( json_encode($this->response) );
+		
 	}
 	
 	/**
@@ -244,28 +281,39 @@ class jsonRPCServer {
 	 *
 	 */
 	public function handle() {
-		/* If there are no users defined, don't use authentication */
-		if ($this->extension != "rpc"){
-			$this->validate();
-		}
+		//readin the data
+		$this->getData();
 
-		try {
-			if (!empty($this->users)){
-	 			$this->authenticate(apache_request_headers());
-	 		}
-			if ($this->extension == "rpc"){
-				$this->rpcCalls();
+		if (!$this->isBatch) {
+			//encapsulate the data into an array.
+			$this->rawData = array($this->rawData);
+		}
+		foreach ($this->rawData as $request) {
+			$this->request = $request
+			if ($this->validate()){
+			
+				try {
+
+					/* If there are no users defined, don't use authentication */
+					if (!empty($this->users)){
+			 			$this->authenticate(apache_request_headers());
+			 		}
+					if ($this->extension == "rpc"){
+						$this->rpcCalls();
+					}
+					$obj = $this->classes[$this->extension];
+				
+					if (($result = call_user_func_array(array($obj,$this->request['method']),$this->request['params'])) !== false) {
+						$this->ok((is_array($result)) ? $result : Array($result));
+					} else {
+						throw new jsonRPCException('Method function returned false.');
+					}
+				} catch (jsonRPCException $e) {
+						$c = ($e->getCode() != 0) ? $e->getCode() : $this->errorCodes['internalError'];
+						$this->error($c,$e->getMessage(),$e->_getErrorData());
+				}
 			}
-			$obj = $this->classes[$this->extension];
-		
-			if (($result = call_user_func_array(array($obj,$this->request['method']),$this->request['params'])) !== false) {
-				$this->ok((is_array($result)) ? $result : Array($result));
-			} else {
-				throw new jsonRPCException('Method function returned false.');
-			}
-		} catch (jsonRPCException $e) {
-				$c = ($e->getCode() != 0) ? $e->getCode() : $this->errorCodes['internalError'];
-				$this->error($c,$e->getMessage(),$e->_getErrorData());
+
 		}
 		$this->sendResponse();
 		return true;
