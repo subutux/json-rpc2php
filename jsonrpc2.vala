@@ -30,13 +30,19 @@ namespace JsonRPC2 {
 		public Message msg;
 		public string host;
 		private string remoteClass;
-		public string body;
 		private bool debug;
 		private string[] auth;
 		private string RpcSessionId;
 		private int requestId;
 		public SessionAsync Session;
-
+		/**
+		* JsonRPC2client
+		*
+		* Constructor
+		* 
+		* @param url	string containing the url of the endpoint (server)
+		* @param rClass string containing the remote class name
+		**/
 		public JsonRPC2client (string url, string rClass) {
 			Session = new SessionAsync();
 			host = url;
@@ -45,13 +51,40 @@ namespace JsonRPC2 {
 			auth = {"",""};
 			requestId = 0;
 		}
+		/**
+		* authenticate
+		*
+		* Sets the authentication parameters.
+		* Authentication will only be executed when these parameters
+		* are set.
+		* 
+		* @param username	string containing the username for auth
+		* @param password	string containing the password for auth
+		**/
 		public void authenticate(string username,string password){
 			auth = {username,password};
 		}
+		/**
+		* setDebug
+		* 
+		* Enables/Disabled debug output to stdout
+		*
+		* @param dbg	bool, true = enables debug
+		**/
 		public void setDebug(bool dbg){
 			debug = dbg;
 		}
-
+		/**
+		* request
+		*
+		* Main function. this function makes the resquests to the
+		* jsonrpc2php server & returns the result as a raw json string
+		* 
+		* @param module		the remoteClass function to call
+		* @param parameters	an string array containing the parameters
+		*					for the remote function
+		* @return			a raw json string containing the result
+		**/
 		public string request (string module,string[] parameters){
 			size_t lenght;
 			string request;
@@ -96,18 +129,12 @@ namespace JsonRPC2 {
 					stdout.printf("H-> x-RPC-Auth-Session: %s\n",RpcSessionId);
 					stdout.printf("--> Receiving:%s\n",returned);
 				}
-				return returned;
 
 			} catch (Error e){
 				error("ERROR: %s\n",e.message);
 			}
-		}
-		public void printUrl (string str) {
-			stdout.printf("the url: %s\n",str);
-			msg = new Message("GET",str);
-			Session.send_message(msg);
-			body = (string) msg.response_body.flatten().data;
-			stdout.printf("the body:\n=========\n%s\n",body);
+
+			return returned;
 		}
 	}
 }
