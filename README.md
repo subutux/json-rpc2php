@@ -76,6 +76,11 @@ Compilation against the library:
 valac --pkg json-glib-1.0 --pkg libsoup-2.4 JsonRPC2.vapi your-vala-project.vala -X JsonRPC2.so -X -I . -o your-vala-project
 ```
 
+You'll need some extra packages to use/compile JsonRPC2. For ex. Ubuntu & Debian:
+```bash
+sudo apt-get install libjson-glib-1.0 libjson-glib-1.0 libsoup-2.4 libsoup-2.4-dev #I think
+```
+
 This is my first Vala library. Any improvements are welcome.
 
 
