@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // or put the JsonRPC2.so in /usr/lib
 using JsonRPC2;
 void main(){
-	// register a new class, same method as the php client.
+	// register a new class, same usage as the php client.
 	var myClass = new JsonRPC2.JsonRPC2client("http://localhost/rpc/index.php","myClass");
 	// debug is disabled by default.
 	myClass.setDebug(true);
