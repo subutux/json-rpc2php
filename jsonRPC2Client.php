@@ -74,8 +74,20 @@ class jsonRPCClient {
         }
         return $nHeaders;
     }
+
     private function setNotification($notify = false){
         $this->notification = $notify;
+    }
+    public function batch() {
+        return new jrpc2c_batch();
+    }
+    public function process($batch){
+        $b = $batch->get_batchCalls();
+        $results = array();
+        $this->activeBatch = true;
+        foreach ($b as $function => $args) {
+            $results[] = call_user_func_array(array($this,$function), $args);
+        }
     }
     public function __call($method,$params){
         // check
@@ -102,6 +114,8 @@ class jsonRPCClient {
                 'params' => $params,
                 'id' => $this->id
             );
+        //testing batch
+        //$request = array($request,$request);
         $opts = array ('http' => array (
                             'method'  => 'POST',
                             'header'  => $this->constructHeaders(),
@@ -139,6 +153,27 @@ class jsonRPCClient {
             return true;
         }
 
+    }
+}
+class jrpc2c_batch {
+    private $batchcalls = array();
+    public function __call($method,$params){
+        if (!is_scalar($method)) {
+            throw new Exception('Method name has no scalar value');
+        }
+        
+        // check
+        if (is_array($params)) {
+            // no keys
+            $params = array_values($params);
+        } else {
+            throw new Exception('Params must be given as array');
+        }
+        $this->batchcalls[$method] = $params;
+
+    }
+    public get_batchCalls(){
+        return $this->batchcalls;
     }
 }
 ?>
