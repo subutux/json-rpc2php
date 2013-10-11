@@ -115,7 +115,7 @@ class myClass {
 Example javascript client
 ------------------------
 ```html
-<script type="javascript/text" src="jsonrpc2php.client.js"></script>
+<script type="text/javascript" src="jsonrpc2php.client.js"></script>
 <script>
 var rpc = new jsonrpcphp('api.php',function(){
 	rpc.myClass.ping("hello world!",function(jsonRpcObj){
