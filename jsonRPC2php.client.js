@@ -28,18 +28,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  function jsonrpcphp(host,mainCallback,options){
  	defaultOptions = {
- 		"ingoreErrors" : [],
+ 		"ignoreErrors" : [],
  		"username" : "",
  		"password" : ""
  	}
  	this.o = $.extend({},defaultOptions,options);
- 	that = this;
+ 	var that = this;
  	this.host = host;
  	this.currId = 0;
- 	this.err = function (code,msg,fullmsg){ 		
- 		if (!$.inArray(msg,that.o.ignoreErrors)){
+ 	this.err = function (code,msg,fullmsg){
+	if ($.inArray(code,this.o.ignoreErrors) < 0){
 			alert(code + "::" + msg + "::" + fullmsg);
-			console.log(msg);
+			//console.log(msg);
 		}
  	}
  	/**
@@ -81,8 +81,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 		  	setHeaders(xhr);
 		  },
 		  error: function(jqXHR,textStatus){
-		  	alert('error:' + textStatus);
-		  	return false;
+		  	//Don't throw an error if we don't expect any results
+		  	if (typeof(callback) != "undefined"){
+		  		alert('error:' + textStatus);
+		  		return false;
+		  	}
 		  },
 		  success: function(r,textStatus,XMLHttpRequest){
 		  	var sessionId = XMLHttpRequest.getResponseHeader("x-RPC-Auth-Session");
