@@ -103,10 +103,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  			return false;	
  		}
  		httpPromise = async(o.uri,o.HttpStringContent).then(function (respose,winWebClient) {
- 			
+
  			o.success(response,HttpWebClient);
  		});
- 		httpPromise
+ 		httpPromise.done(function () {
+
+            WinJS.log && WinJS.log("Completed", "request" + o.type , "status");
+            
+ 		})
 
  	}	
  	/**
