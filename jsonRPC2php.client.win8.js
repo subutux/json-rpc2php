@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  		"username" : "",
  		"password" : ""
  	}
- 	winWebClient = new Windows.Web.Http.HttpClient();
  	
  	this.o = this.extend({},defaultOptions,options);
  	var that = this;
@@ -60,6 +59,56 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 			//console.log(msg);
 		}
  	}
+ 	this.ajax = function(options) {
+ 		defaultOptions = {
+ 			url : "",
+ 			type: "GET",
+ 			data: "",
+ 			contentType : "application/json",
+ 			dataType: "json",
+ 			error : function (HttpWebClient) { return true;},
+ 			success : function (data,HttpWebClient) { return true;},
+ 			beforeSend : function (HttpWebClient) { return true;},
+
+ 		};
+ 		o = that.extend({},defaultOptions,options);
+ 		//protocolFilter
+ 		protocolFilter = new Windows.Web.Http.Filters.HttpBaseProtocolFilter();
+	 	protocolFilter.AllowAutoRedirect = true;
+	 	protocolFilter.AutomaticDecompression = true;
+	 	// Initiate client
+ 		winWebClient = new Windows.Web.Http.HttpClient(protocolFilter);
+ 		if (o.dataType == "json") {
+ 			// Set media type to application/json
+ 			winWebClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+ 		}
+ 		if (o.contentType == "application/json") {
+ 			// If contentType is json, convert it to a HttpStringContent
+ 			o.HttpStringContent = new new Windows.Web.Http.HttpStringContent(JSON.stringify(o.data));
+ 		}
+ 		o.uri = new Windows.Foundation.Uri(url);
+
+ 		o.beforeSend(winWebClient);
+
+ 		if (o.type == "GET") {
+ 			async = winWebClient.PostAsync;
+ 		} else if (o.type == "POST") {
+ 			async = winWebClient.GetAsync;
+ 		} else if (o.type == "DELETE") {
+ 			async = winWebClient.DeleteAsync;
+ 		} else if (o.type == "PUT") {
+ 			async = winWebClient.PutAsync;
+ 		} else {
+ 			error(null,"Unknown method " + type)
+ 			return false;	
+ 		}
+ 		httpPromise = async(o.uri,o.HttpStringContent).then(function (respose,winWebClient) {
+ 			
+ 			o.success(response,HttpWebClient);
+ 		});
+ 		httpPromise
+
+ 	}	
  	/**
  	 * Main rpc function, wrapper for $.ajax();
  	 *
