@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  	this.o = $.extend({},defaultOptions,options);
  	var that = this;
  	this.host = host;
+ 	this.q = new Array();
  	this.currId = 0;
  	this.err = function (code,msg,fullmsg){
 	if ($.inArray(code,this.o.ignoreErrors) < 0){
@@ -62,7 +63,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  		if (typeof(callback) != "undefined"){
  			this.currId += 1;
  			request.id = this.currId;
+ 			// Add to the queue
+ 			that.q[this.currId] = callback;
  		}
+
  		function setHeaders(xhr){
  			if (typeof(that.o['sessionId']) != "undefined"){
  				xhr.setRequestHeader("x-RPC-Auth-Session",that.o['sessionId'])
@@ -98,11 +102,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  				console.log(r.error);*/
  				return false;
  			} else if (typeof r.id != "undefined"){
- 				if (r.id == request.id){
- 					callback(r);
+ 				if (r.id in that.q){
+ 					// execute the callback saved in the Queue.
+ 					that.q[r.id](r);
+ 					// unset the callback.
+ 					delete that.q[r.id];
  				} else {
  					//alert("jsonrpc2Error::NO_ID_MATCH::Given Id and recieved Id does not match");
- 					that.err("jsonrpc2Error","NO_ID_MATCH","Given Id and recieved Id does not match");
+ 					that.err("jsonrpc2Error","NO_CALLBACK","Callback for id \'" + r.id + "\' not found.");
  					return false;
  				}
  			} else {
