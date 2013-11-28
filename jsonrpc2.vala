@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 // Compile: valac --pkg json-glib-1.0 --pkg libsoup-2.4 --library=JsonRPC2 -H JsonRPC2.h jsonrpc2.vala -X -fPIC -X -shared -o JsonRPC2.so
 // Tested with ubuntu 13.04
-// for debian/Ubuntu : sudo apt-get install libjson-glib-1.0 libjson-glib-1.0 libsoup-2.4 libsoup-2.4-dev #I think
+// for debian/Ubuntu : sudo apt-get install libjson-glib-1.0 libjson-glib-1.0-dev libsoup-2.4 libsoup-2.4-dev #I think
 
 using Soup;
 using Json;
