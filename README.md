@@ -18,7 +18,9 @@ it contains the following:
 Open Source
 ------------
 
-json-rpc2php is open source under GPLv2 licence. Please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=J8RZGZC5WPZDU&lc=BE&item_name=Subutux&item_number=TRANSRSS&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted) so I can keep working on this.
+json-rpc2php is open source under GPLv2 licence. Please consider a donation so I can keep working on this.
+
+[![donation](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=J8RZGZC5WPZDU&lc=BE&item_name=Stijn%20Van%20Campenhout%20Develops&item_number=CODE%20DONATION&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
 
 Features php server
 --------------------
@@ -113,7 +115,7 @@ class myClass {
 Example javascript client
 ------------------------
 ```html
-<script type="javascript/text" src="jsonrpc2php.client.js"></script>
+<script type="text/javascript" src="jsonrpc2php.client.js"></script>
 <script>
 var rpc = new jsonrpcphp('api.php',function(){
 	rpc.myClass.ping("hello world!",function(jsonRpcObj){
