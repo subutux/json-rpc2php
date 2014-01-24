@@ -119,7 +119,7 @@ Example javascript client
 <script>
 var rpc = new jsonrpcphp('api.php',function(){
 	rpc.myClass.ping("hello world!",function(jsonRpcObj){
-		alert(jsonRpcObj.return);
+		alert(jsonRpcObj.result);
 	});
 });
 </script>
