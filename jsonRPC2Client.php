@@ -36,7 +36,7 @@ class jsonRPCClient {
     private $class;
     private $auth;
 
-    public function __construct($host,$class,$auth=array()){
+    public function __construct($host,$class="",$auth=array()){
         $this->url = $host;
         $this->class = $class;
         $this->id = 1;
@@ -96,9 +96,15 @@ class jsonRPCClient {
         } else {
             $currentId = $this->id;
         }
+
+        // Prepend the class name if it's set
+        if (isset($this->class) && $this->class) {
+            $method = $this->class . '.' . $method;
+        }
+
         $request = array(
                 'jsonrpc' => '2.0',
-                'method' => $this->class . '.' . $method,
+                'method' => $method,
                 'params' => $params,
                 'id' => $this->id
             );
