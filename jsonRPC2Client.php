@@ -82,7 +82,7 @@ class jsonRPCClient {
         if (!is_scalar($method)) {
             throw new Exception('Method name has no scalar value');
         }
-        
+
         // check
         if (is_array($params)) {
             // no keys
@@ -116,23 +116,19 @@ class jsonRPCClient {
         $context  = stream_context_create($opts);
         if ($fp = fopen($this->url, 'r', false, $context)) {
             $h = $this->parseHeaders($http_response_header);
-            print_r($h);
             if (isset($h['x-RPC-Auth-Session'])){
-                print("setting session id to " . $h['x-RPC-Auth-Session']);
                 $this->auth['sessionId'] = $h['x-RPC-Auth-Session'];
             }
             $response = '';
             while($row = fgets($fp)) {
                 $response.= trim($row)."\n";
             }
-        echo "resp:".$response;
             $response = json_decode($response,true);
         } else {
             throw new Exception('Unable to connect to '.$this->url);
         }
         if (!$this->notification) {
             // check
-        print_r($response);
             if ($response['id'] != $currentId) {
                 throw new Exception('Incorrect response id (request id: '.$currentId.', response id: '.$response['id'].')');
             }
@@ -140,7 +136,7 @@ class jsonRPCClient {
                 throw new Exception('Request error: '.$response['error']['code'].'::'.$response['error']['message'].':'.$response['error']['code']);
             }
             return $response['result'];
-            
+
         } else {
             return true;
         }
