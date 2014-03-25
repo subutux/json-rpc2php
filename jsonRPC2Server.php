@@ -63,6 +63,7 @@ class jsonRPCServer {
 		'authenticationError'	=> '-32604',
 		'extensionNotFound'		=> '-32000'
 		);
+	private $useAuthentication = false;
 	private $users = array();
 	/**
 	 * Register a class as an extension
@@ -86,6 +87,18 @@ class jsonRPCServer {
 		foreach ($this->users as $user => $pass){
 		}
 		return true;
+	}
+	/**
+	 * Enables or disables authentication
+	 * 
+	 * @param bool $state set true for enable, false for disable
+	 */
+	public function enableAuthentication($state=""){
+		if (is_bool($state)){
+			$this->useAuthentication = $state;
+		} else if ($state == ""){
+			$this->useAuthentication = true;
+		}
 	}
 	/**
 	 * Verifies the authentication
@@ -265,7 +278,7 @@ class jsonRPCServer {
 		}
 
 		try {
-			if (!empty($this->users)){
+			if ($this->useAuthentication){
 	 			$this->authenticate(apache_request_headers());
 	 		}
 			if ($this->extension == "rpc"){
