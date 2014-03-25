@@ -88,6 +88,21 @@ class jsonRPCServer {
 		return true;
 	}
 	/**
+	 * Verifies the authentication
+	 *
+	 * This function defaults to the buildin simple authentication
+	 * so you can extend jsonRPC2Server and override this function
+	 * with your own authentication mechanism.
+	 *
+	 * @param string $user username from header x-rpc-auth-username
+	 * @param string $password password from header x-rpc-auth-password
+	 */
+	public function verifyAuth($user,$pass){
+		if ($this->users[$user] == $pass){
+			return true;
+		} else return false;
+	}
+	/**
 	 * Handles the authentication
 	 * @param  Array $HTTPHeaders Contains the apache_request_headers()
 	 */
@@ -96,7 +111,7 @@ class jsonRPCServer {
 			$HTTPHeaders[strtolower($i)] = $c;
 		}
 		if (isset($HTTPHeaders['x-rpc-auth-username']) && isset($HTTPHeaders['x-rpc-auth-password'])){
-			if ($this->users[$HTTPHeaders['x-rpc-auth-username']] == $HTTPHeaders['x-rpc-auth-password']){
+			if ($this->verifyAuth($HTTPHeaders['x-rpc-auth-username'],$HTTPHeaders['x-rpc-auth-password'])){
 				session_start();
 				$sid = session_id();
 				$_SESSION["ip"] = $_SERVER["REMOTE_ADDR"];
@@ -172,7 +187,7 @@ class jsonRPCServer {
 			}
 			$this->request['method'] = $requestMethod[1];
 			
-			if (!isset($this->classes[$this->extension]) || !method_exists($this->classes[$this->extension],$this->request['method']) && $this->extension != "rpc"){
+			if (!method_exists($this->classes[$this->extension],$this->request['method']) && $this->extension != "rpc"){
 				throw new Exception($this->errorCodes['methodNotFound']);
 			};
 	
