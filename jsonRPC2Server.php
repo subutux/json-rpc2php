@@ -65,6 +65,30 @@ class jsonRPCServer {
 		);
 	private $useAuthentication = false;
 	private $users = array();
+
+	/**
+	 * Sets the Cross Origin Resource Sharing headers
+	 * 
+	 * This functions sets the needed CORS headers
+	 * to allow other sites to access your json-rpc2 api.
+	 * 
+	 * @param bool $auth 	If you don't want to set the special auth variables
+	 *						set this to false. (only if you don't plan to use auth)
+	 * @param array $allow 	Defaults to '*' if empty, else sets the allowed sites from array
+	 */
+	public function setCORSheaders($auth=true,$allow=array()){
+		if (empty($allow)){
+			header('Access-Control-Allow-Origin: *');
+		} else {
+			header('Access-Control-Allow-Origin: '.join(', ',$allow));
+		}
+		if ($auth){
+			header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, X-Rpc-Auth-Username, X-Rpc-Auth-Password, x-Rpc-Auth-Session');
+			header('Access-Control-Expose-Headers: x-Rpc-Auth-Session');
+		} else {
+			header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
+		}
+	}
 	/**
 	 * Register a class as an extension
 	 * methods will be available as [class].[method]
