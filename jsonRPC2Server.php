@@ -135,6 +135,7 @@ class jsonRPCServer {
 	 * @param string $password password from header x-rpc-auth-password
 	 */
 	public function verifyAuth($user,$pass){
+		if (!isset($this->users[$user])) return false;
 		if ($this->users[$user] == $pass){
 			return true;
 		} else return false;
