@@ -70,7 +70,7 @@ class jsonRPCClient {
         $nHeaders = array();
         foreach ($headers as $header) {
             $h = explode(": ", $header);
-            $nHeaders[$h[0]] = $h[1];
+            if (isset($h[1])) $nHeaders[$h[0]] = $h[1];
         }
         return $nHeaders;
     }
