@@ -135,7 +135,7 @@ class jsonRPCClient {
             if (!is_null($response['error'])) {
                 throw new Exception('Request error: '.$response['error']['code'].'::'.$response['error']['message'].':'.$response['error']['code']);
             }
-            return $response['result'];
+            return (is_array($response['result']) && isset($response['result'][0]) && (count($response['result']) == 1)) ? $response['result'][0] :  $response['result'] ;
 
         } else {
             return true;
