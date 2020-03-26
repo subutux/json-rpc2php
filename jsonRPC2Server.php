@@ -225,7 +225,7 @@ class jsonRPCServer {
 			}
 			$this->request['method'] = $requestMethod[1];
 			
-			if (!method_exists($this->classes[$this->extension],$this->request['method']) && $this->extension != "rpc"){
+			if ($this->extension != "rpc" && !method_exists($this->classes[$this->extension],$this->request['method'])){
 				throw new jsonRPCException("",$this->errorCodes['methodNotFound']);
 			};
 	
